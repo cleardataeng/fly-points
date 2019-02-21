@@ -1,0 +1,4 @@
+- export metrics to stackdriver
+- add options to enable/disable error reporting, stackdriver logging, etc.
+- improve jmespath & regex validation
+- unit tests for Routes and associated objects

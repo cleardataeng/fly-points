@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fly-points-ingress
+  labels:
+    app: fly-points-ingress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fly-points-ingress
+  template:
+    metadata:
+      labels:
+        app: fly-points-ingress
+    spec:
+      containers:
+        - name: fly-points-ingress
+          image: cleardata/fly-points-ingress
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/svc-acct/key.json
+          volumeMounts:
+          - name: svc-acct
+            mountPath: /etc/svc-acct
+            readOnly: true
+          - name: fly-points-config
+            mountPath: /etc/fly-points
+      volumes:
+        - name: svc-acct
+          secret:
+            secretName: fly-points-ingress-svc-acct
+        - name: fly-points-config
+          configMap:
+            name: fly-points-config

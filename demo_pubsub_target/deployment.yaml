@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-pubsub-target
+  namespace: fly-points
+  labels:
+    app: demo-pubsub-target
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-pubsub-target
+  template:
+    metadata:
+      labels:
+        app: demo-pubsub-target
+    spec:
+      containers:
+        - name: fly-points-demo-pubsub-target
+          image: cleardata/fly-points-demo-pubsub-target
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/svc-acct/key.json
+          volumeMounts:
+          - name: svc-acct
+            mountPath: /etc/svc-acct
+            readOnly: true
+      volumes:
+        - name: svc-acct
+          secret:
+            secretName: fly-points-ingress-svc-acct
