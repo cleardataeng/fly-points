@@ -53,6 +53,9 @@ format is::
             regexes:
               - <regex1>
               - <regex2>
+	    literals:
+	      - <literal1>
+	      - <literal2>
 
 
 The top-level key is always ``routes`` and it is always a list of
@@ -64,15 +67,21 @@ messages via Pub/Sub or HTTP PUT.
 Matchers define which messages to send.  The ``path`` field indicates
 which field in the Stackdriver logs should be considered.  jmespath is
 used to specify the path, so you can easily look at embedded parts of
-the log message.  ``regexes`` is a list of regexes to match against
-the content extracted from the messages at ``path``.
+the log message.  You can provide regular expressions and string
+literals to match against the content extracted from the messages at
+``path``.  ``regexes`` is a list of regular expressions, ``literals``
+is a list of string literals.  Either may be empty, but at least one
+regex or literal must be provided.  Literals are intended to match
+null/None values or regular expression special characters that appear
+in logs.
 
-Importantly: matchers are ANDed together, regexes are ORed.  That is:
-- at least one regex must match in order for a matcher to match.
+Importantly: matchers are ANDed together, regexes/literals are ORed.
+That is:
+- at least one regex or literal must match in order for a matcher to match.
 - every matcher must match for the route to trigger.
 
 
-Here is a useful examples::
+Here is a useful example::
 
   routes:
     - name: demo-put-target
