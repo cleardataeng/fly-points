@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import collections
+import collections.abc
 import json
 import re
 
@@ -33,12 +34,22 @@ class Matcher(object):
         regexes (list): a list of regexes to test the extracted data
 
     '''
-    def __init__(self, path, regexes):
-        if not isinstance(regexes, list) or len(regexes) < 1:
-            raise ValueError('Invalid matcher: regexes must be a non-empty list')
+    def __init__(self, path, regexes=(), literals=()):
+        if not isinstance(regexes, collections.abc.Sequence):
+            raise ValueError('Invalid matcher: regexes must be a list')
+
+        if not isinstance(literals, collections.abc.Sequence):
+            raise ValueError('Invalid matcher: literals must be a list')
+
+        if len(regexes) + len(literals) < 1:
+            raise ValueError(
+                'Invalid matcher: There must be at least one regex or literal'
+                ' to match against'
+            )
 
         self.path = jmespath.compile(path)
         self.regexes = [re.compile(x) for x in regexes]
+        self.literals = literals
 
     def __call__(self, message):
         value = self.path.search(message)
@@ -49,13 +60,19 @@ class Matcher(object):
                 if r.search(str(value)):
                     return True
 
+        # check all literals, allows None (null) match for no jmespath match
+        for l in self.literals:
+            if value == l:
+                return True
+
         return False
 
     def __repr__(self):
-        return '%s(path=%s, regexes=%s)' % (
+        return '%s(path=%s, regexes=%s, literals=%s)' % (
             self.__class__.__name__,
             self.path.expression,
             self.regexes,
+            self.literals,
         )
 
 

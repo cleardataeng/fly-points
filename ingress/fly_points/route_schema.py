@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from marshmallow import fields, post_load, Schema, validate
+from marshmallow import fields, post_load, Schema, validate, validates_schema
+from marshmallow.exceptions import ValidationError
 import yaml
 
 from . import routes
@@ -75,7 +76,16 @@ class MatcherSchema(CustomSchema):
 
     '''
     path = fields.Str(required=True)  # TODO: validate jmespath
-    regexes = fields.List(fields.Str, required=True)  # TODO: validate regex
+    regexes = fields.List(fields.Str)  # TODO: validate regex
+    literals = fields.List(fields.Str(allow_none=True))
+
+    # must have either regexes or literals, allow both
+    @validates_schema
+    def validate_matcher(self, data):
+        if 'regexes' not in data and 'literals' not in data:
+            raise ValidationError(
+                'A matches must have either regexes or literals defined'
+            )
 
     @post_load
     def make_matcher(self, data):
