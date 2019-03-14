@@ -44,6 +44,7 @@ with warnings.catch_warnings():
 
 # status flag, goes false on SIGTERM to cleanly exit
 run = True
+start_time = time.time()
 
 # global metrics
 global_metrics = collections.defaultdict(int)
@@ -56,7 +57,7 @@ publisher = None
 
 
 def main():
-    global publisher, routes, run
+    global publisher, routes, run, start_time
 
     # install handler for sigterm for clean shutdown
     signal.signal(signal.SIGINT, handle_sigterm)
@@ -84,6 +85,7 @@ def main():
                 'metrics': {
                     'global': dict(global_metrics),
                     'per_route': {r.name: dict(r.metrics) for r in routes},
+                    'running_time': time.time() - start_time,
                 },
             })
             time.sleep(10)
